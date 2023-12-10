@@ -29,7 +29,7 @@ const migrationCommands = function (transaction) {
   return [{
     fn: "createTable",
     params: [
-      "profiles",
+      "bots",
       {
         "id": {
           "type": Sequelize.UUID,
@@ -37,44 +37,15 @@ const migrationCommands = function (transaction) {
           "primaryKey": true,
           "defaultValue": Sequelize.UUIDV4
         },
-        "about": {
+        "prompt": {
           "type": Sequelize.TEXT,
-          "field": "about",
+          "field": "prompt",
           "defaultValue": ''
         },
-        "headline": {
+        "greeting": {
           "type": Sequelize.TEXT,
-          "field": "headline",
+          "field": "greeting",
           "defaultValue": ''
-        },
-        "name": {
-          "type": Sequelize.STRING,
-          "field": "name",
-          "allowNull": false
-        },
-        "linkedin": {
-          "type": Sequelize.STRING,
-          "field": "linkedin",
-          "allowNull": true,
-          "defaultValue": null,
-        },
-        "website": {
-          "type": Sequelize.STRING,
-          "field": "website",
-          "allowNull": true,
-          "defaultValue": null,
-        },
-        "avatar": {
-          "type": Sequelize.STRING,
-          "field": "avatar",
-          "allowNull": true,
-          "defaultValue": null
-        },
-        "file": {
-          "type": Sequelize.STRING,
-          "field": "file",
-          "allowNull": true,
-          "defaultValue": null
         },
         "userId": {
           "type": Sequelize.UUID,
@@ -107,11 +78,11 @@ const migrationCommands = function (transaction) {
   {
     fn: "addIndex",
     params: [
-      "profiles",
+      "bots",
       ["userId"],
       {
-        "indexName": "profiles_user_id",
-        "name": "profiles_user_id",
+        "indexName": "bots_user_id",
+        "name": "bots_user_id",
         "transaction": transaction
       }
     ]
@@ -121,7 +92,7 @@ const migrationCommands = function (transaction) {
 const rollbackCommands = function (transaction) {
   return [{
     fn: "dropTable",
-    params: ["profiles", {
+    params: ["bots", {
       transaction: transaction
     }]
   }

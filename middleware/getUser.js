@@ -21,10 +21,16 @@ const getUser = (req, res, next) => {
           where: {
             id: userId
           },
-          include: [{
-            model: db.profile,
-            as: 'profile',
-          }]
+          include: [
+            {
+              model: db.profile,
+              as: 'profile',
+            },
+            {
+              model: db.bot,
+              as: 'bot',
+            }
+          ]
         });
         if (user) {
           req.user = user;

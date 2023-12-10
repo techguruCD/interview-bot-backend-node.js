@@ -1,7 +1,10 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
+const Handlebars = require('handlebars')
+const fs = require('fs')
 const db = require('../db')
+const path = require('path')
 
 exports.signup = async (req, res) => {
   try {
@@ -20,6 +23,11 @@ exports.signup = async (req, res) => {
     await db.profile.create({
       userId: user.id,
       name: user.name
+    })
+    await db.bot.create({
+      userId: user.id,
+      prompt: Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/prompts/chat.hbs'), 'utf-8'))({user}, {allowProtoPropertiesByDefault: true}),
+      greeting: Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/initialMessage.hbs'), 'utf-8'))({user}, {allowProtoPropertiesByDefault: true})
     })
     return res.status(200).send({})
   } catch (err) {

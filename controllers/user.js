@@ -3,6 +3,7 @@ exports.me = async (req, res) => {
     id: req.user.id,
     email: req.user.email,
     name: req.user.name,
-    profile: req.user.profile
+    profile: req.user.profile,
+    bot: req.user.bot
   })
 }

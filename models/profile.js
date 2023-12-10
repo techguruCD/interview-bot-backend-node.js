@@ -6,12 +6,12 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true
         },
         about: {
-            type: Sequelize.STRING,
+            type: Sequelize.TEXT,
             defaultValue: '',
             allowNull: false
         },
         headline: {
-            type: Sequelize.STRING,
+            type: Sequelize.TEXT,
             defaultValue: '',
             allowNull: false
         },
