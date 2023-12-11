@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken")
 const db = require('../db')
+const { initConversationChain } = require("../services/llm")
 
 const getUser = (req, res, next) => {
   let token = req.headers['authorization']
@@ -23,6 +24,10 @@ const getUser = (req, res, next) => {
           },
           include: [
             {
+              model: db.draftProfile,
+              as: 'draftProfile'
+            },
+            {
               model: db.profile,
               as: 'profile',
             },
@@ -34,6 +39,7 @@ const getUser = (req, res, next) => {
         });
         if (user) {
           req.user = user;
+          await initConversationChain(user)
         }
         next();
       } catch (err) {

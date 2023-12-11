@@ -3,8 +3,10 @@ const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
 const Handlebars = require('handlebars')
 const fs = require('fs')
-const db = require('../db')
 const path = require('path')
+
+const db = require('../db')
+const { saveEmbedding, delEmbedding } = require('../services/llm.js')
 
 exports.signup = async (req, res) => {
   try {
@@ -20,14 +22,17 @@ exports.signup = async (req, res) => {
     if (!created) {
       return res.status(500).send({ message: { error: 'User exists' } })
     }
-    await db.profile.create({
+    const draftProfile = await db.draftProfile.create({
       userId: user.id,
-      name: user.name
+      name: user.name,
+      status: "share"
     })
+    const prompt = Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/prompts/chat.hbs'), 'utf-8'))({ user }, { allowProtoPropertiesByDefault: true })
+    // let pineconeDocId = (await saveEmbedding(prompt))[0]
     await db.bot.create({
       userId: user.id,
-      prompt: Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/prompts/chat.hbs'), 'utf-8'))({user}, {allowProtoPropertiesByDefault: true}),
-      greeting: Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/initialMessage.hbs'), 'utf-8'))({user}, {allowProtoPropertiesByDefault: true})
+      prompt,
+      greeting: Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/initialMessage.hbs'), 'utf-8'))({ user }, { allowProtoPropertiesByDefault: true })
     })
     return res.status(200).send({})
   } catch (err) {

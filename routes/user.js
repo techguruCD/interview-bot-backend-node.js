@@ -5,5 +5,8 @@ const requiresAuth = require('../middleware/requiresAuth')
 const controller = require('../controllers/user')
 
 router.get('/me', requiresAuth, controller.me)
+router.post('/chat', requiresAuth, controller.sendMessage)
+router.post('/draft-profile', requiresAuth, controller.saveDraftProfile)
+router.post('/publish-profile', requiresAuth, controller.publishProfile)
 
 module.exports = router;
