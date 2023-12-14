@@ -18,6 +18,10 @@ app.use(require('./middleware/getUser'))
 app.use('/auth', require('./routes/auth'))
 app.use('/user', require('./routes/user'))
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '/build/index.html'))
+})
+
 app.use((err, req, res, next) => {
   if (err && err.error && err.error.isJoi) {
     res.status(400).send({
