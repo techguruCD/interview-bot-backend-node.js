@@ -8,7 +8,7 @@ const path = require('path')
 const app = express()
 app.use(cors())
 
-app.use(bodyParser.json({limit: '50mb'}))
+app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
@@ -17,6 +17,19 @@ app.use('/', express.static(path.join(__dirname, 'build')))
 app.use(require('./middleware/getUser'))
 app.use('/auth', require('./routes/auth'))
 app.use('/user', require('./routes/user'))
+
+app.use((err, req, res, next) => {
+  if (err && err.error && err.error.isJoi) {
+    res.status(400).send({
+      message: { error: err.error.toString() },
+      isJoi: true,
+      errors: err.error.details
+    });
+  } else {
+    // pass on to another error handler
+    next(err);
+  }
+})
 
 async function connectDB() {
   await db.sequelize.authenticate();

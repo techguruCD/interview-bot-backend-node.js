@@ -39,7 +39,6 @@ const getUser = (req, res, next) => {
         });
         if (user) {
           req.user = user;
-          await initConversationChain(user)
         }
         next();
       } catch (err) {
