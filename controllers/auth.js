@@ -10,7 +10,32 @@ const { saveEmbedding, delEmbedding } = require('../services/llm.js')
 
 exports.signup = async (req, res) => {
   try {
-    const { email, name, password, role = "user", status = "1" } = req.body
+    const { email, name, password, role = "user" } = req.body
+    let chatId = name.toLowerCase()
+    const chatIds = await db.profile.findAll({
+      attributes: ['chatId'],
+      where: {
+        chatId: {
+          [db.Sequelize.Op.like]: chatId + '%'
+        }
+      }
+    })
+    for (let i = 0; i <= chatIds.length; i++) {
+      let targetChatId = chatId;
+      if (i)
+        targetChatId += i;
+      if (i == chatIds.length) {
+        chatId = targetChatId;
+        break;
+      }
+      if (targetChatId != chatIds[i].chatId) {
+        chatId = targetChatId;
+        break;
+      }
+    }
+    console.log('------------')
+    console.log(chatId)
+    console.log('============')
     const [user, created] = await db.user.findOrCreate({
       where: { email },
       defaults: {
@@ -28,6 +53,7 @@ exports.signup = async (req, res) => {
       userId: user.id,
       name: user.name,
       status: "share",
+      chatId,
       prompt,
       greeting
     })

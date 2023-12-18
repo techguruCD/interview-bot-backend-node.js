@@ -35,10 +35,10 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: null,
             allowNull: true
         },
-        file: {
-            type: Sequelize.STRING,
-            defaultValue: null,
-            allowNull: true
+        files: {
+            type: Sequelize.ARRAY(Sequelize.JSON),
+            defaultValue: [],
+            allowNull: false
         },
         prompt: {
             type: Sequelize.TEXT,
@@ -47,6 +47,10 @@ module.exports = (sequelize, Sequelize) => {
         greeting: {
             type: Sequelize.TEXT,
             defaultValue: ''
+        },
+        chatId: {
+            type: Sequelize.STRING,
+            allowNull: false
         },
         userId: {
             type: Sequelize.UUID,

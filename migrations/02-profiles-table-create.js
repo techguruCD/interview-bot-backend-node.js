@@ -70,11 +70,11 @@ const migrationCommands = function (transaction) {
           "allowNull": true,
           "defaultValue": null
         },
-        "file": {
-          "type": Sequelize.STRING,
-          "field": "file",
-          "allowNull": true,
-          "defaultValue": null
+        "files": {
+          "type": Sequelize.ARRAY(Sequelize.JSON),
+          "field": "files",
+          "allowNull": false,
+          "defaultValue": []
         },
         "prompt": {
           type: Sequelize.TEXT,
@@ -85,6 +85,11 @@ const migrationCommands = function (transaction) {
           type: Sequelize.TEXT,
           field: 'greeting',
           defaultValue: ''
+        },
+        "chatId": {
+          type: Sequelize.STRING,
+          "field": "chatId",
+          allowNull: false
         },
         "userId": {
           "type": Sequelize.UUID,

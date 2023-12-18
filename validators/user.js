@@ -12,11 +12,27 @@ const profile = validator.body(
     linkedin: Joi.string().allow('').required().label('Linkedin'),
     prompt: Joi.string().allow('').required().label('prompt'),
     greeting: Joi.string().allow('').required().label('greeting'),
-    avatar: Joi.any().allow(null).required().label('Avatar'),
-    file: Joi.any().allow(null).required().label('File'),
+    avatar: Joi.any().allow(null).required().label('Avatar')
   }).required()
 )
 
+const addFile = validator.body(
+  Joi.object({
+    data: Joi.string().required(),
+    name: Joi.string().required(),
+    content2FileType: Joi.string().required(),
+    content2Extension: Joi.string().required()
+  })
+)
+
+const deleteFile = validator.body(
+  Joi.object({
+    id: Joi.string().required()
+  })
+)
+
 module.exports = {
-  profile
+  profile,
+  addFile,
+  deleteFile
 }

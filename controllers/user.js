@@ -1,5 +1,7 @@
 const fs = require('fs')
 const path = require('path')
+const { v4: uuid } = require('uuid')
+const moment = require('moment')
 const { generateMessage } = require("../services/llm")
 const llm = require('../services/llm')
 const db = require('../db')
@@ -26,7 +28,7 @@ exports.sendMessage = async (req, res) => {
 }
 
 exports.updateProfile = async (req, res) => {
-  const { name, about, headline, linkedin, website, prompt, greeting, avatar, file } = req.body;
+  const { name, about, headline, linkedin, website, prompt, greeting, avatar } = req.body;
   const profile = await db.profile.findOne({ where: { id: req.user.profile.id } })
   try {
     const draftProfile = {
@@ -37,28 +39,6 @@ exports.updateProfile = async (req, res) => {
       website,
       prompt,
       greeting
-    }
-
-    if (req.user.profile?.file != file) {
-      if (req.user.profile?.file) {
-        try {
-          fs.unlinkSync(path.join(__dirname, '../', req.user.profile.file))
-        } catch (err) { console.log(err) }
-      }
-      if (file) {
-        const base64Data = file.data.split(',')[1];
-        const decodedData = Buffer.from(base64Data, 'base64')
-        const timestamp = '' + new Date().getTime()
-        const fileName = `/uploads/${timestamp}_${file.name}`
-        try {
-          fs.mkdirSync(path.join(__dirname, '../uploads'))
-        } catch (err) { }
-        const filePath = path.join(__dirname, '../', fileName)
-        fs.writeFileSync(filePath, decodedData)
-        draftProfile.file = fileName
-      } else {
-        draftProfile.file = null
-      }
     }
 
     if (req.user.profile?.avatar != avatar) {
@@ -84,7 +64,7 @@ exports.updateProfile = async (req, res) => {
       }
     }
     await profile.update(draftProfile)
-    await llm.saveEmbedding({ profileId: profile.id, file: profile.file, profile: profile.about })
+    // await llm.saveEmbedding({ profileId: profile.id, file: profile.file, profile: profile.about })
     res.status(200).send({
       data: profile,
       message: { success: 'Profile updated' }
@@ -93,4 +73,52 @@ exports.updateProfile = async (req, res) => {
     console.log(err)
     res.status(500).send({ message: { error: err.message } })
   }
+}
+
+exports.addFile = async (req, res) => {
+  const { data, name, content2Extension } = req.body;
+
+  const base64Data = data.split(',')[1];
+  const decodedData = Buffer.from(base64Data, 'base64')
+  const id = uuid()
+  const fileName = `/uploads/${id}.${content2Extension}`
+  try {
+    fs.mkdirSync(path.join(__dirname, '../uploads'))
+  } catch (err) { }
+  const filePath = path.join(__dirname, '../', fileName)
+  fs.writeFileSync(filePath, decodedData)
+  const profile = await db.profile.findOne({ where: { id: req.user.profile.id } })
+  await profile.update({
+    files: [
+      ...profile.files,
+      {
+        id, name, type: content2Extension, path: fileName, createdAt: moment().utc().format('yyyy-MM-DD HH:mm:ss')
+      }
+    ]
+  })
+
+  res.send({
+    data: profile.files,
+    message: { success: 'Uploaded successfully' }
+  })
+}
+
+exports.deleteFile = async (req, res) => {
+  const { id } = req.body
+  const profile = await db.profile.findOne({ where: { id: req.user.profile.id } })
+  const index = profile.files.findIndex(file => file.id == id)
+  if (index < 0) {
+    return res.status(400).send({ message: { error: 'File not found' } })
+  }
+  const file = profile.files[index];
+  try {
+    fs.unlinkSync(path.join(__dirname, '../', file.path))
+  } catch (err) { console.log(err) }
+  await profile.update({
+    files: [...profile.files.slice(0, index), ...profile.files.slice(index + 1)]
+  })
+  res.send({
+    data: profile.files,
+    message: { success: 'File deleted successfully' }
+  })
 }
