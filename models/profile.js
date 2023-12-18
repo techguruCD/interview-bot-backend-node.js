@@ -40,6 +40,14 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: null,
             allowNull: true
         },
+        prompt: {
+            type: Sequelize.TEXT,
+            defaultValue: ''
+        },
+        greeting: {
+            type: Sequelize.TEXT,
+            defaultValue: ''
+        },
         userId: {
             type: Sequelize.UUID,
             allowNull: false,

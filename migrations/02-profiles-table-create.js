@@ -76,6 +76,16 @@ const migrationCommands = function (transaction) {
           "allowNull": true,
           "defaultValue": null
         },
+        "prompt": {
+          type: Sequelize.TEXT,
+          field: 'prompt',
+          defaultValue: ''
+        },
+        "greeting": {
+          type: Sequelize.TEXT,
+          field: 'greeting',
+          defaultValue: ''
+        },
         "userId": {
           "type": Sequelize.UUID,
           "onUpdate": "CASCADE",

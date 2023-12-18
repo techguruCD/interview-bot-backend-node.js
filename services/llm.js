@@ -30,37 +30,43 @@ const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX_NAME)
 // const pineconeStore = new PineconeStore(embeddings, { pineconeIndex })
 const openAIClient = new OpenAIClient(process.env.AZURE_OPENAI_BASE_URL, new AzureKeyCredential(process.env.AZURE_OPENAI_KEY))
 
-async function saveEmbedding(profile) {
-  let docs = [{
-    pageContent: profile.about,
-    metadata: {
-      profileId: profile.id,
-      type: 'profile'
-    }
-  }]
-  if (profile.file) {
+async function saveEmbedding({ profileId, profile, file }) {
+  let docs = [];
+  let metaFilters = [];
+  if (profile) {
+    docs.push({
+      pageContent: profile,
+      metadata: {
+        profileId,
+        type: 'profile'
+      }
+    })
+    metaFilters.push('profile')
+  }
+  if (file) {
     try {
-      const loader = new PDFLoader(path.join(__dirname, '../', profile.file))
+      const loader = new PDFLoader(path.join(__dirname, '../', file))
       docs = docs.concat((await loader.load()).map(doc => ({
         pageContent: doc.pageContent,
         metadata: {
-          profileId: profile.id,
+          profileId,
           type: 'cv'
         }
       })))
-    } catch(err) {
+      metaFilters.push('cv')
+    } catch (err) {
       console.log(err)
     }
   }
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex })
-  await vectorStore.delete({ filter: { profileId: { $eq: '' + profile.id } } })
+  await vectorStore.delete({ filter: { profileId: { $eq: '' + profileId }, type: { $in: metaFilters } } })
   await vectorStore.addDocuments(docs)
 }
 
 async function generateMessage(user, messages) {
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex })
   const inputDoc = (await vectorStore.similaritySearch(messages[messages.length - 1].content, 5, { profileId: { $eq: '' + user.profile.id } })).map((doc, index) => `- Document ${index + 1}: ${doc.pageContent}`).join('\n')
-  const systemContent = `Similarity Docs: ${inputDoc}\n\nPrompt:"${user.bot.prompt}"`
+  const systemContent = `Similarity Docs: ${inputDoc}\n\nPrompt:"${user.profile.prompt}"`
 
   try {
     const result = await openAIClient.getChatCompletions(process.env.AZURE_OPENAI_CHAT_DEPLOYMENT_ID, [

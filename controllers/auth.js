@@ -22,17 +22,14 @@ exports.signup = async (req, res) => {
     if (!created) {
       return res.status(500).send({ message: { error: 'User exists' } })
     }
-    const draftProfile = await db.draftProfile.create({
+    const prompt = Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/prompts/chat.hbs'), 'utf-8'))({ user }, { allowProtoPropertiesByDefault: true })
+    const greeting = Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/initialMessage.hbs'), 'utf-8'))({ user }, { allowProtoPropertiesByDefault: true })
+    const profile = await db.profile.create({
       userId: user.id,
       name: user.name,
-      status: "share"
-    })
-    const prompt = Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/prompts/chat.hbs'), 'utf-8'))({ user }, { allowProtoPropertiesByDefault: true })
-    // let pineconeDocId = (await saveEmbedding(prompt))[0]
-    await db.bot.create({
-      userId: user.id,
+      status: "share",
       prompt,
-      greeting: Handlebars.compile(fs.readFileSync(path.join(__dirname, '../configs/initialMessage.hbs'), 'utf-8'))({ user }, { allowProtoPropertiesByDefault: true })
+      greeting
     })
     return res.status(200).send({})
   } catch (err) {

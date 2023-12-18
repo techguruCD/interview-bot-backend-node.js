@@ -24,16 +24,8 @@ const getUser = (req, res, next) => {
           },
           include: [
             {
-              model: db.draftProfile,
-              as: 'draftProfile'
-            },
-            {
               model: db.profile,
               as: 'profile',
-            },
-            {
-              model: db.bot,
-              as: 'bot',
             }
           ]
         });
