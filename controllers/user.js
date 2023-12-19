@@ -21,10 +21,31 @@ exports.sendMessage = async (req, res) => {
       message: { error: 'No profile is published' }
     })
   }
-  const message = await generateMessage(req.user, req.body.messages)
+  const { chatId, messages } = req.body
+  const profile = await db.profile.findOne({ where: { chatId } })
+  const message = await generateMessage(profile, messages)
   if (message)
     return res.json({ data: message })
   return res.status(500).send({ message: { error: 'Please try again later' } })
+}
+
+exports.profileGreeting = async (req, res) => {
+  const { chatId } = req.query;
+  console.log(chatId)
+
+  const profile = await db.profile.findOne({ where: { chatId } })
+  if (!profile) {
+    return res.status(400).send({
+      message: { error: 'No chat found' }
+    })
+  }
+  return res.json({
+    data: {
+      avatar: profile.avatar,
+      greeting: profile.greeting,
+      name: profile.name
+    }
+  })
 }
 
 exports.updateProfile = async (req, res) => {

@@ -63,10 +63,10 @@ async function saveEmbedding({ profileId, profile, file }) {
   await vectorStore.addDocuments(docs)
 }
 
-async function generateMessage(user, messages) {
+async function generateMessage(profile, messages) {
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex })
-  const inputDoc = (await vectorStore.similaritySearch(messages[messages.length - 1].content, 5, { profileId: { $eq: '' + user.profile.id } })).map((doc, index) => `- Document ${index + 1}: ${doc.pageContent}`).join('\n')
-  const systemContent = `Similarity Docs: ${inputDoc}\n\nPrompt:"${user.profile.prompt}"`
+  const inputDoc = (await vectorStore.similaritySearch(messages[messages.length - 1].content, 5, { profileId: { $eq: '' + profile.id } })).map((doc, index) => `- Document ${index + 1}: ${doc.pageContent}`).join('\n')
+  const systemContent = `Similarity Docs: ${inputDoc}\n\nPrompt:"${profile.prompt}"`
 
   try {
     const result = await openAIClient.getChatCompletions(process.env.AZURE_OPENAI_CHAT_DEPLOYMENT_ID, [
