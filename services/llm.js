@@ -30,6 +30,45 @@ const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX_NAME)
 // const pineconeStore = new PineconeStore(embeddings, { pineconeIndex })
 const openAIClient = new OpenAIClient(process.env.AZURE_OPENAI_BASE_URL, new AzureKeyCredential(process.env.AZURE_OPENAI_KEY))
 
+async function saveFileEmbedding({fileName, profileId, fileId}) {
+  const loader = new PDFLoader(path.join(__dirname, '../', fileName))
+  const docs = (await loader.load()).map(doc => ({
+    pageContent: doc.pageContent,
+    metadata: {
+      profileId,
+      fileId,
+      type: 'cv'
+    }
+  }))
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {pineconeIndex})
+  await vectorStore.addDocuments(docs)
+}
+
+async function delFileEmbedding({profileId, fileId, fileName}) {
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {pineconeIndex})
+  await vectorStore.delete({filter: {
+    profileId: {$eq: '' + profileId},
+    fileId: {$eq: fileId},
+    type: {$eq: 'cv'}
+  }})
+}
+
+async function saveProfileEmbedding({profileId, content}) {
+  let docs = [
+    {
+      pageContent: content,
+      metadata: {
+        profileId,
+        type: 'profile'
+      }
+    }
+  ]
+
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {pineconeIndex})
+  await vectorStore.delete({filter: {profileId: {$eq: '' + profileId}, type: {$eq: 'profile'}}})
+  await vectorStore.addDocuments(docs)
+}
+
 async function saveEmbedding({ profileId, profile, file }) {
   let docs = [];
   let metaFilters = [];
@@ -63,10 +102,10 @@ async function saveEmbedding({ profileId, profile, file }) {
   await vectorStore.addDocuments(docs)
 }
 
-async function generateMessage(profile, messages) {
+async function generateMessage({profileId, sitePrompt, profilePrompt, messages}) {
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex })
-  const inputDoc = (await vectorStore.similaritySearch(messages[messages.length - 1].content, 5, { profileId: { $eq: '' + profile.id } })).map((doc, index) => `- Document ${index + 1}: ${doc.pageContent}`).join('\n')
-  const systemContent = `Similarity Docs: ${inputDoc}\n\nPrompt:"${profile.prompt}"`
+  const inputDoc = (await vectorStore.similaritySearch(messages[messages.length - 1].content, 5, { profileId: { $eq: '' + profileId } })).map((doc, index) => `- Document ${index + 1}: ${doc.pageContent}`).join('\n')
+  const systemContent = `Similarity Docs: ${inputDoc}\n\nPrompt:"${sitePrompt}\n${profilePrompt}\n********************************\n"`
 
   try {
     const result = await openAIClient.getChatCompletions(process.env.AZURE_OPENAI_CHAT_DEPLOYMENT_ID, [
@@ -84,5 +123,8 @@ async function generateMessage(profile, messages) {
 
 module.exports = {
   saveEmbedding,
+  saveFileEmbedding,
+  saveProfileEmbedding,
+  delFileEmbedding,
   generateMessage
 }

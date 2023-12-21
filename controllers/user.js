@@ -11,19 +11,16 @@ exports.me = async (req, res) => {
     id: req.user.id,
     email: req.user.email,
     name: req.user.name,
+    role: req.user.role,
     profile: req.user.profile
   })
 }
 
 exports.sendMessage = async (req, res) => {
-  if (!req.user.profile) {
-    return res.status(404).send({
-      message: { error: 'No profile is published' }
-    })
-  }
   const { chatId, messages } = req.body
   const profile = await db.profile.findOne({ where: { chatId } })
-  const message = await generateMessage(profile, messages)
+  const setting = await db.setting.findOne({})
+  const message = await generateMessage({profileId: profile.id, sitePrompt: setting.sitePrompt, profilePrompt: profile.prompt, messages})
   if (message)
     return res.json({ data: message })
   return res.status(500).send({ message: { error: 'Please try again later' } })
@@ -85,6 +82,7 @@ exports.updateProfile = async (req, res) => {
       }
     }
     await profile.update(draftProfile)
+    await llm.saveProfileEmbedding({profileId: profile.id, content: profile.about})
     // await llm.saveEmbedding({ profileId: profile.id, file: profile.file, profile: profile.about })
     res.status(200).send({
       data: profile,
@@ -117,7 +115,8 @@ exports.addFile = async (req, res) => {
       }
     ]
   })
-
+  await llm.saveFileEmbedding({fileName, fileId: id, profileId: profile.id})
+  // await llm.saveEmbedding({ profileId: profile.id, file: profile.file, profile: profile.about })
   res.send({
     data: profile.files,
     message: { success: 'Uploaded successfully' }
@@ -138,6 +137,7 @@ exports.deleteFile = async (req, res) => {
   await profile.update({
     files: [...profile.files.slice(0, index), ...profile.files.slice(index + 1)]
   })
+  await llm.delFileEmbedding({profileId: profile.id, fileName: file.name, fileId: file.id})
   res.send({
     data: profile.files,
     message: { success: 'File deleted successfully' }

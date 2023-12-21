@@ -11,6 +11,13 @@ const { saveEmbedding, delEmbedding } = require('../services/llm.js')
 exports.signup = async (req, res) => {
   try {
     const { email, name, password, role = "user" } = req.body
+    const totalCount = await db.user.count({where: {role: 'USER'}})
+    const setting = await db.setting.findOne({})
+    if (setting.usersLimit <= totalCount) {
+      return res.status(400).send({
+        message: {error: `Users limited to ${setting.usersLimit}`}
+      })
+    }
     let chatId = name.toLowerCase()
     const chatIds = await db.profile.findAll({
       attributes: ['chatId'],

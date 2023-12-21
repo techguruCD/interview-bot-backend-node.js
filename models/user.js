@@ -23,6 +23,12 @@ module.exports = (sequelize, Sequelize) => {
       values: ['google', 'linkedin'],
       allowNull: true
     },
+    role: {
+      type: Sequelize.ENUM,
+      values: ['ADMIN', 'USER'],
+      allowNull: false,
+      defaultValue: 'USER'
+    },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.NOW,
