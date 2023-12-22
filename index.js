@@ -14,11 +14,11 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use('/', express.static(path.join(__dirname, 'build')))
 
-app.use(require('./middleware/getUser'))
-app.use('/', require('./routes/me'))
-app.use('/auth', require('./routes/auth'))
-app.use('/user', require('./routes/user'))
-app.use('/admin', require('./routes/admin'))
+app.use('/api', require('./middleware/getUser'))
+app.use('/api', require('./routes/me'))
+app.use('/api/auth', require('./routes/auth'))
+app.use('/api/user', require('./routes/user'))
+app.use('/api/admin', require('./routes/admin'))
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/build/index.html'))
