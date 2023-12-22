@@ -5,16 +5,8 @@ const moment = require('moment')
 const { generateMessage } = require("../services/llm")
 const llm = require('../services/llm')
 const db = require('../db')
-
-exports.me = async (req, res) => {
-  res.status(200).send({
-    id: req.user.id,
-    email: req.user.email,
-    name: req.user.name,
-    role: req.user.role,
-    profile: req.user.profile
-  })
-}
+const { PDFLoader } = require('langchain/document_loaders/fs/pdf')
+const { DocxLoader } = require('langchain/document_loaders/fs/docx')
 
 exports.sendMessage = async (req, res) => {
   const { chatId, messages } = req.body
@@ -63,14 +55,13 @@ exports.updateProfile = async (req, res) => {
       if (req.user.profile?.avatar) {
         try {
           fs.unlinkSync(path.join(__dirname, '../', req.user.profile?.avatar))
-
         } catch (err) { console.log(err) }
       }
       if (avatar) {
         const base64Data = avatar.data.split(',')[1];
         const decodedData = Buffer.from(base64Data, 'base64')
         const timestamp = '' + new Date().getTime()
-        const fileName = `/uploads/${timestamp}_${avatar.name}`
+        const fileName = `/uploads/avatar_${timestamp}.${avatar.content2Extension}`
         try {
           fs.mkdirSync(path.join(__dirname, '../uploads'))
         } catch (err) { }
@@ -95,32 +86,71 @@ exports.updateProfile = async (req, res) => {
 }
 
 exports.addFile = async (req, res) => {
-  const { data, name, content2Extension } = req.body;
-
-  const base64Data = data.split(',')[1];
-  const decodedData = Buffer.from(base64Data, 'base64')
-  const id = uuid()
-  const fileName = `/uploads/${id}.${content2Extension}`
   try {
-    fs.mkdirSync(path.join(__dirname, '../uploads'))
-  } catch (err) { }
-  const filePath = path.join(__dirname, '../', fileName)
-  fs.writeFileSync(filePath, decodedData)
-  const profile = await db.profile.findOne({ where: { id: req.user.profile.id } })
-  await profile.update({
-    files: [
-      ...profile.files,
-      {
-        id, name, type: content2Extension, path: fileName, createdAt: moment().utc().format('yyyy-MM-DD HH:mm:ss')
-      }
-    ]
-  })
-  await llm.saveFileEmbedding({fileName, fileId: id, profileId: profile.id})
-  // await llm.saveEmbedding({ profileId: profile.id, file: profile.file, profile: profile.about })
-  res.send({
-    data: profile.files,
-    message: { success: 'Uploaded successfully' }
-  })
+
+    const { data, name, content2Extension } = req.body;
+  
+    const base64Data = data.split(',')[1];
+    const decodedData = Buffer.from(base64Data, 'base64')
+    const id = uuid()
+    const fileName = `/uploads/${id}.${content2Extension}`
+    try {
+      fs.mkdirSync(path.join(__dirname, '../uploads'))
+    } catch (err) { }
+    const filePath = path.join(__dirname, '../', fileName)
+    fs.writeFileSync(filePath, decodedData)
+  
+    let docs = null;
+    if (content2Extension == 'pdf') {
+      const loader = new PDFLoader(path.join(__dirname, '../', fileName))
+      docs = (await loader.load()).map(doc => ({
+        pageContent: doc.pageContent,
+        metadata: {
+          profileId: req.user.profile.id,
+          fileId: id,
+          type: 'cv'
+        }
+      }))
+    } else if (content2Extension == 'docx') {
+      const loader = new DocxLoader(path.join(__dirname, '../', fileName))
+      docs = (await loader.load()).map(doc => ({
+        pageContent: doc.pageContent,
+        metadata: {
+          profileId: req.user.profile.id,
+          fileId: id,
+          type: 'cv'
+        }
+      }))
+    } else {
+      return res.statsu(400).send({
+        message: {error: 'Please select PDF or DOCX'}
+      })
+    }
+
+    console.log(docs)
+
+    await llm.saveDocsEmbedding({docs})
+  
+    const profile = await db.profile.findOne({ where: { id: req.user.profile.id } })
+    await profile.update({
+      files: [
+        ...profile.files,
+        {
+          id, name, type: content2Extension, path: fileName, createdAt: moment().utc().format('yyyy-MM-DD HH:mm:ss')
+        }
+      ]
+    })
+    // await llm.saveFileEmbedding({fileName, fileId: id, profileId: profile.id})
+    // await llm.saveEmbedding({ profileId: profile.id, file: profile.file, profile: profile.about })
+    res.send({
+      data: profile.files,
+      message: { success: 'Uploaded successfully' }
+    })
+  } catch (err) {
+    return res.status(400).send({
+      message: {error: 'Please try again later'}
+    })
+  }
 }
 
 exports.deleteFile = async (req, res) => {

@@ -44,6 +44,11 @@ async function saveFileEmbedding({fileName, profileId, fileId}) {
   await vectorStore.addDocuments(docs)
 }
 
+async function saveDocsEmbedding({docs}) {
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {pineconeIndex})
+  await vectorStore.addDocuments(docs)
+}
+
 async function delFileEmbedding({profileId, fileId, fileName}) {
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {pineconeIndex})
   await vectorStore.delete({filter: {
@@ -126,5 +131,6 @@ module.exports = {
   saveFileEmbedding,
   saveProfileEmbedding,
   delFileEmbedding,
-  generateMessage
+  generateMessage,
+  saveDocsEmbedding
 }
