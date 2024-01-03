@@ -1,4 +1,7 @@
 require('dotenv').config()
+const fs = require('fs')
+const https = require('https')
+const http = require('http')
 const express = require('express')
 const cors = require('cors')
 const db = require('./db')
@@ -42,11 +45,24 @@ async function connectDB() {
   console.log('Connected to database')
 }
 
+let server = null;
+if (process.env.MODE === 'development') {
+  server = http.createServer(app)
+} else {
+  server = https.createServer({
+    key: fs.readFileSync('/etc/letsencrypt/live/interviewbot.com.au/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/interviewbot.com.au/fullchain.pem')
+  }, app)
+}
+
+
 async function main() {
   await connectDB()
   const PORT = process.env.PORT || 5000
-  await app.listen(PORT, '0.0.0.0')
-  console.log('Listening to', PORT)
+  server.listen(PORT, () => {
+    console.log('Listening to', PORT)
+  })
+  // await app.listen(PORT, '0.0.0.0')
 }
 
 main()
