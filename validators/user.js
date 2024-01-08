@@ -31,8 +31,16 @@ const deleteFile = validator.body(
   })
 )
 
+const questions = validator.query(
+  Joi.object({
+    page: Joi.number().min(1).required().label('Page'),
+    pageSize: Joi.number().min(1).required().label('Page Size')
+  }).required()
+)
+
 module.exports = {
   profile,
   addFile,
-  deleteFile
+  deleteFile,
+  questions
 }

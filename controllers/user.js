@@ -9,31 +9,60 @@ const { PDFLoader } = require('langchain/document_loaders/fs/pdf')
 const { DocxLoader } = require('langchain/document_loaders/fs/docx')
 
 exports.sendMessage = async (req, res) => {
-  const { chatId, messages } = req.body
-  const profile = await db.profile.findOne({ where: { chatId } })
+  let { chatId, messages, interviewerIndex } = req.body
+  
+  const profile = await db.profile.findOne({ 
+    where: { chatId },
+    include: [
+      {
+        model: db.user,
+        as: 'user'
+      }
+    ]
+  })
+  
+  if (interviewerIndex > profile.user.interviewerIndex) {
+    return res.status(400).send({
+      message: {error: 'Invalid Interview Index'}
+    })
+  }
+  
   const setting = await db.setting.findOne({})
   const message = await generateMessage({profileId: profile.id, sitePrompt: setting.sitePrompt, profilePrompt: profile.prompt, messages})
-  if (message)
+  if (message) {
+    await db.question.create({
+      question: messages[messages.length - 1].content,
+      answer: message,
+      intervieweeId: profile.user.id,
+      interviewerIndex: profile.user.interviewerIndex,
+    })
     return res.json({ data: message })
+  }
   return res.status(500).send({ message: { error: 'Please try again later' } })
 }
 
-exports.profileGreeting = async (req, res) => {
-  const { chatId } = req.query;
-  console.log(chatId)
-
+exports.chatInit = async (req, res) => {
+  const { chatId } = req.body;
   const profile = await db.profile.findOne({ where: { chatId } })
   if (!profile) {
     return res.status(400).send({
       message: { error: 'No chat found' }
     })
   }
+  const user = await db.user.findOne({where: {id: profile.userId}})
+  if (!user) {
+    return res.status(400).send({
+      message: { error: 'No chat found' }
+    })
+  }
+  await user.update({ interviewerIndex: user.interviewerIndex + 1 })
   return res.json({
     data: {
       avatar: profile.avatar,
       greeting: profile.greeting,
-      name: profile.name
-    }
+      name: profile.name,
+    },
+    interviewerIndex: user.interviewerIndex
   })
 }
 
@@ -172,4 +201,34 @@ exports.deleteFile = async (req, res) => {
     data: profile.files,
     message: { success: 'File deleted successfully' }
   })
+}
+
+exports.questions = async (req, res) => {
+  try {
+    const { page, pageSize } = req.query
+    const totalCount = await db.question.count({where: {intervieweeId: req.user.id}})
+    const totalPage = Math.ceil(totalCount / pageSize)
+    const questions = await db.question.findAll({
+      where: {
+        intervieweeId: req.user.id
+      },
+      limit: pageSize,
+      offset: pageSize * (page - 1),
+      order: [
+        ['createdAt', 'DESC']
+      ]
+    })
+    return res.json({
+      data: {
+        questions,
+        page,
+        totalPage,
+        totalCount
+      },
+    })
+  } catch (err) {
+    return res.status(400).send({
+      message: {error: 'Please try again later.'}
+    })
+  }
 }
