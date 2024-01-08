@@ -29,6 +29,11 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       defaultValue: 'USER'
     },
+    interviewerIndex: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.NOW,

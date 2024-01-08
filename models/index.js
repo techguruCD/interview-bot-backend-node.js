@@ -17,4 +17,8 @@ db.user.hasOne(db.profile, {foreignKey: 'userId', as: 'profile'})
 db.blog = require('./blog.js')(sequelize, Sequelize)
 db.setting = require('./setting.js')(sequelize, Sequelize)
 
+db.question = require('./question.js')(sequelize, Sequelize)
+db.question.belongsTo(db.user, {foreignKey: 'intervieweeId', as: 'user'})
+db.user.hasMany(db.question, {foreignKey: 'intervieweeId', as: 'questions'})
+
 module.exports = db;
