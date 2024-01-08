@@ -55,6 +55,11 @@ if (process.env.MODE === 'development') {
   }, app)
 }
 
+const redirectionApp = express()
+redirectionApp.get('*', (req, res) => {
+  console.log(req.originalUrl);
+  res.redirect(301, 'https://interviewbot.com.au' + req.originalUrl)
+})
 
 async function main() {
   await connectDB()
@@ -62,6 +67,9 @@ async function main() {
   server.listen(PORT, () => {
     console.log('Listening to', PORT)
   })
+  if (process.env.MODE === 'development') {
+    redirectionApp.listen(80, '0.0.0.0')
+  }
   // await app.listen(PORT, '0.0.0.0')
 }
 
