@@ -57,8 +57,7 @@ if (process.env.MODE === 'development') {
 
 const redirectionApp = express()
 redirectionApp.get('*', (req, res) => {
-  console.log(req.originalUrl);
-  res.redirect(301, 'https://interviewbot.com.au' + req.originalUrl)
+  res.redirect(301, process.env.BASE_URL + req.originalUrl)
 })
 
 async function main() {
@@ -67,8 +66,9 @@ async function main() {
   server.listen(PORT, () => {
     console.log('Listening to', PORT)
   })
-  if (process.env.MODE === 'development') {
-    redirectionApp.listen(80, '0.0.0.0')
+  if (process.env.MODE !== 'development') {
+    await redirectionApp.listen(80, '0.0.0.0')
+    console.log('redirection server is listening')
   }
   // await app.listen(PORT, '0.0.0.0')
 }
