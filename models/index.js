@@ -21,4 +21,6 @@ db.question = require('./question.js')(sequelize, Sequelize)
 db.question.belongsTo(db.user, {foreignKey: 'intervieweeId', as: 'user'})
 db.user.hasMany(db.question, {foreignKey: 'intervieweeId', as: 'questions'})
 
+db.chatbotquestion = require('./chatbotquestion.js')(sequelize, Sequelize)
+
 module.exports = db;
