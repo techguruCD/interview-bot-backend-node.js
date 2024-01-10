@@ -10,6 +10,19 @@ const blog = validator.query(
   }).required()
 )
 
+const chatbotSendMessage = validator.body(
+  Joi.object({
+    messages: Joi.array().items(
+      Joi.object({
+        role: Joi.string().min(1).required(),
+        content: Joi.string().min(1).required()
+      })
+    ).min(1).required().label('Messages'),
+    chatbotIndex: Joi.number().min(1).required().label('Chatbot index')
+  }).required()
+)
+
 module.exports = {
-  blog
+  blog,
+  chatbotSendMessage
 }

@@ -15,6 +15,26 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: 100,
             allowNull: false
         },
+        chatbotPrompt: {
+            type: Sequelize.TEXT,
+            defaultValue: '',
+            allowNull: false
+        },
+        chatbotGreeting: {
+            type: Sequelize.TEXT,
+            defaultValue: '',
+            allowNull: false
+        },
+        chatbotFiles: {
+            type: Sequelize.ARRAY(Sequelize.JSON),
+            allowNull: false,
+            defaultValue: []
+        },
+        chatbotIndex: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            defaultValue: 0
+        },
         createdAt: {
             type: Sequelize.DATE,
             defaultValue: Sequelize.NOW,
