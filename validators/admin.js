@@ -40,8 +40,32 @@ const deleteBlog = validator.body(
 const updateSetting = validator.body(
   Joi.object({
     usersLimit: Joi.number().min(1).required().label('Users Limit'),
-    sitePrompt: Joi.string().min(1).max(5000).label('Site prompt')
+    sitePrompt: Joi.string().min(1).max(5000).label('Site prompt'),
+    chatbotGreeting: Joi.string().min(1).max(5000).label('Chatbot greeting'),
+    chatbotPrompt: Joi.string().min(1).max(5000).label('Chatbot prompt'),
   })
+)
+
+const chatbotAddFile = validator.body(
+  Joi.object({
+    data: Joi.string().required(),
+    name: Joi.string().required(),
+    content2FileType: Joi.string().required(),
+    content2Extension: Joi.string().required()
+  })
+)
+
+const chatbotDeleteFile = validator.body(
+  Joi.object({
+    id: Joi.string().required()
+  })
+)
+
+const chatbotQuestions = validator.query(
+  Joi.object({
+    page: Joi.number().min(1).required().label('Page'),
+    pageSize: Joi.number().min(1).required().label('Page Size')
+  }).required()
 )
 
 module.exports = {
@@ -49,5 +73,8 @@ module.exports = {
   blogs,
   createBlog,
   deleteBlog,
-  updateSetting
+  updateSetting,
+  chatbotAddFile,
+  chatbotDeleteFile,
+  chatbotQuestions
 }

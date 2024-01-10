@@ -4,11 +4,14 @@ const requiresAdmin = require('../middleware/requiresAdmin')
 const validator = require('../validators/admin');
 const controller = require('../controllers/admin');
 
-router.get('/users', requiresAdmin, validator.users, controller.users)
-router.get('/blogs', requiresAdmin, validator.blogs, controller.blogs)
-router.post('/create-blog', requiresAdmin, validator.createBlog, controller.createBlog)
-router.post('/delete-blog', requiresAdmin, validator.deleteBlog, controller.deleteBlog)
+router.get('/users', validator.users, requiresAdmin, controller.users)
+router.get('/blogs', validator.blogs, requiresAdmin, controller.blogs)
+router.post('/create-blog', validator.createBlog, requiresAdmin, controller.createBlog)
+router.post('/delete-blog', validator.deleteBlog, requiresAdmin, controller.deleteBlog)
 router.get('/setting', requiresAdmin, controller.setting)
-router.post('/setting', requiresAdmin, validator.updateSetting, controller.updateSetting)
+router.post('/setting', validator.updateSetting, requiresAdmin, controller.updateSetting)
+router.post('/setting-add-file', validator.chatbotAddFile, requiresAdmin, controller.chatbotAddFile)
+router.post('/setting-delete-file', validator.chatbotDeleteFile, requiresAdmin, controller.chatbotDeleteFile)
+router.get('/chatbot-questions', validator.chatbotQuestions, requiresAdmin, controller.chatbotQuestions)
 
 module.exports = router;
