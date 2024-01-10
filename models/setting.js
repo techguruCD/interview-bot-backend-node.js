@@ -20,6 +20,11 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: '',
             allowNull: false
         },
+        chatbotGreeting: {
+            type: Sequelize.TEXT,
+            defaultValue: '',
+            allowNull: false
+        },
         chatbotFiles: {
             type: Sequelize.ARRAY(Sequelize.JSON),
             allowNull: false,

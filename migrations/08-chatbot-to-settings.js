@@ -14,6 +14,14 @@ module.exports = {
       })
     await queryInterface.addColumn(
       'settings', 
+      'chatbotGreeting',
+      {
+        type: Sequelize.TEXT,
+        allowNull: false,
+        defaultValue: ''
+      })
+    await queryInterface.addColumn(
+      'settings', 
       'chatbotFiles',
       {
         type: Sequelize.ARRAY(Sequelize.JSON),
@@ -31,6 +39,7 @@ module.exports = {
   },
   down: async function (queryInterface, Sequelize) {
     await queryInterface.removeColumn('settings', 'chatbotPrompt')
+    await queryInterface.removeColumn('settings', 'chatbotGreeting')
     await queryInterface.removeColumn('settings', 'chatbotFiles')
     await queryInterface.removeColumn('settings', 'chatbotIndex')
   },
