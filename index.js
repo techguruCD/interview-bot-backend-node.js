@@ -57,6 +57,7 @@ if (process.env.MODE === 'development') {
 
 const redirectionApp = express()
 redirectionApp.get('*', (req, res) => {
+  console.log(req.originalUrl)
   res.redirect(301, process.env.BASE_URL + req.originalUrl)
 })
 
