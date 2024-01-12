@@ -21,7 +21,7 @@ const blogs = validator.query(
 const createBlog = validator.body(
   Joi.object({
     title: Joi.string().min(1).max(255).required().label('Title'),
-    content: Joi.string().min(1).max(5000).required().label('Content'),
+    content: Joi.string().min(1).required().label('Content'),
     image: Joi.object({
       data: Joi.string().min(1).required(),
       name: Joi.string().min(1).required(),
