@@ -37,7 +37,10 @@ exports.blogs = async (req, res) => {
     const totalPage = Math.ceil(totalCount / pageSize)
     const blogs = await db.blog.findAll({
         limit: pageSize,
-        offset: pageSize * (page - 1)
+        offset: pageSize * (page - 1),
+        order: [
+            ['createdAt', 'DESC']
+        ]
     })
     return res.json({
         data: {

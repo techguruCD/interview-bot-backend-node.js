@@ -19,6 +19,9 @@ exports.me = async (req, res) => {
 exports.blogs = async (req, res) => {
   const blogs = await db.blog.findAll({
     limit: 5,
+    order: [
+      ['createdAt', 'DESC']
+    ]
   })
   res.json({
     blogs
