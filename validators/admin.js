@@ -31,6 +31,26 @@ const createBlog = validator.body(
   })
 )
 
+const updateBlogQuery = validator.query(
+  Joi.object({
+    id: Joi.string().required()
+  })
+)
+
+const updateBlogBody = validator.body(
+  Joi.object({
+    title: Joi.string().min(1).max(255).required().label('Title'),
+    content: Joi.string().min(1).required().label('Content'),
+    image: Joi.any().allow(null).required().label('Image')
+    // image: Joi.object({
+    //   data: Joi.string().min(1).required(),
+    //   name: Joi.string().min(1).required(),
+    //   content2FileType: Joi.string().min(1).required(),
+    //   content2Extension: Joi.string().min(1).required()
+    // }).allow(null).optional()
+  })
+)
+
 const deleteBlog = validator.body(
   Joi.object({
     id: Joi.string().min(1).required().label('id')
@@ -76,5 +96,7 @@ module.exports = {
   updateSetting,
   chatbotAddFile,
   chatbotDeleteFile,
-  chatbotQuestions
+  chatbotQuestions,
+  updateBlogQuery,
+  updateBlogBody
 }

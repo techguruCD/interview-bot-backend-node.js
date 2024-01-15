@@ -11,6 +11,12 @@ const { saveEmbedding, delEmbedding } = require('../services/llm.js')
 exports.signup = async (req, res) => {
   try {
     const { email, name, password, role = "user" } = req.body
+    if (!name.match('^[a-zA-Z0-9]*$')) {
+      return res.status(400).send({
+        errors: {name: 'Name should be a-z, A-Z, 0-9 characters.'},
+        message: {error: 'Name should be a-z, A-Z, 0-9 characters.'}
+      })
+    }
     const totalCount = await db.user.count({where: {role: 'USER'}})
     const setting = await db.setting.findOne({})
     if (setting.usersLimit <= totalCount) {

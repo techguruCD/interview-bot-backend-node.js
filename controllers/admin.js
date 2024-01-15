@@ -69,9 +69,56 @@ exports.createBlog = async (req, res) => {
 
     const blog = await db.blog.create(draftBlog)
     return res.json({
-        data: blog,
+        blog,
         message: { success: 'Blog created successfully' }
     })
+}
+
+exports.updateBlog = async (req, res) => {
+    const { title, content, image } = req.body;
+    const { id } = req.query
+    const draftBlog = {
+        title, content
+    }
+    const blog = await db.blog.findOne({ where: { id } })
+    if (!blog) {
+        return res.status(400).send({
+            message: { error: 'Blog not found' }
+        })
+    }
+    try {
+        if (blog.image != image) {
+            if (blog.image) {
+                try {
+                    fs.unlinkSync(path.join(__dirname, '../', blog.image))
+                } catch (err) { console.log(err) }
+            }
+            if (image) {
+                const base64Data = image.data.split(',')[1];
+                const decodedData = Buffer.from(base64Data, 'base64')
+                const timestamp = '' + new Date().getTime()
+                const fileName = `/uploads/blog_${timestamp}.${image.content2Extension}`
+                try {
+                    fs.mkdirSync(path.join(__dirname, '../uploads'))
+                } catch (err) { }
+                const filePath = path.join(__dirname, '../', fileName)
+                fs.writeFileSync(filePath, decodedData)
+                draftBlog.image = fileName
+            } else {
+                draftBlog.image = null
+            }
+        }
+        await blog.update(draftBlog)
+        return res.json({
+            blog,
+            message: { success: 'Blog updated successfully' }
+        })
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send({
+            message: { error: 'Please try again later' }
+        })
+    }
 }
 
 exports.deleteBlog = async (req, res) => {
