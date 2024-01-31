@@ -33,9 +33,10 @@ exports.users = async (req, res) => {
 
 exports.blogs = async (req, res) => {
     const { page, pageSize = 10 } = req.query
-    const totalCount = await db.blog.count()
+    const totalCount = await db.blog.count() - 1
     const totalPage = Math.ceil(totalCount / pageSize)
     const blogs = await db.blog.findAll({
+        where: { type: 'blog' },
         limit: pageSize,
         offset: pageSize * (page - 1),
         order: [
@@ -262,6 +263,22 @@ exports.chatbotQuestions = async (req, res) => {
         })
     } catch (err) {
         return res.status(400).send({
+            message: { error: 'Please try again later.' }
+        })
+    }
+}
+
+exports.updateAbout = async (req, res) => {
+    try {
+        const { content } = req.body;
+        const about = await db.blog.findOne({ where: { type: 'about' } })
+        await about.update({ content })
+        return res.json({
+            about,
+            message: { success: 'About blog updated successfully' }
+        })
+    } catch (err) {
+        return res.status(500).send({
             message: { error: 'Please try again later.' }
         })
     }

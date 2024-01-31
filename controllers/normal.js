@@ -18,6 +18,9 @@ exports.me = async (req, res) => {
 
 exports.blogs = async (req, res) => {
   const blogs = await db.blog.findAll({
+    where: {
+      type: 'blog'
+    },
     limit: 5,
     order: [
       ['createdAt', 'DESC']
@@ -37,6 +40,18 @@ exports.blog = async (req, res) => {
   }
   res.json({
     blog
+  })
+}
+
+exports.about = async (req, res) => {
+  const about = await db.blog.findOne({where: {type: 'about'}})
+  if (!about) {
+    return res.status(400).send({
+      message: {error: 'About blog not found'}
+    })
+  }
+  res.json({
+    about
   })
 }
 

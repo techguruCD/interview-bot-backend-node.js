@@ -88,6 +88,12 @@ const chatbotQuestions = validator.query(
   }).required()
 )
 
+const updateAbout = validator.body(
+  Joi.object({
+    content: Joi.string().min(1).required().label('Content')
+  })
+)
+
 module.exports = {
   users,
   blogs,
@@ -98,5 +104,6 @@ module.exports = {
   chatbotDeleteFile,
   chatbotQuestions,
   updateBlogQuery,
-  updateBlogBody
+  updateBlogBody,
+  updateAbout
 }

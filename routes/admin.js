@@ -14,5 +14,6 @@ router.post('/setting', validator.updateSetting, requiresAdmin, controller.updat
 router.post('/setting-add-file', validator.chatbotAddFile, requiresAdmin, controller.chatbotAddFile)
 router.post('/setting-delete-file', validator.chatbotDeleteFile, requiresAdmin, controller.chatbotDeleteFile)
 router.get('/chatbot-questions', validator.chatbotQuestions, requiresAdmin, controller.chatbotQuestions)
+router.post('/update-about', validator.updateAbout, requiresAdmin, controller.updateAbout)
 
 module.exports = router;

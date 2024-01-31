@@ -1,12 +1,9 @@
 {
   "files": {
-    "main.css": "/static/css/main.2f96de93.css",
-    "main.js": "/static/js/main.4a15a7c6.js",
+    "main.css": "/static/css/main.cf150082.css",
+    "main.js": "/static/js/main.2999c6ea.js",
     "static/js/787.9e9f4ffd.chunk.js": "/static/js/787.9e9f4ffd.chunk.js",
-    "static/media/future.png": "/static/media/future.2c8b2c210e8a8e6f9893.png",
-    "static/media/aboutone.png": "/static/media/aboutone.b5236e507939e9451a61.png",
     "static/media/chatbot.png": "/static/media/chatbot.57797571a301ac47b2ac.png",
-    "static/media/aboutwo.png": "/static/media/aboutwo.6a1da61b7048bf7af439.png",
     "static/media/LeftToRightFlow.svg": "/static/media/LeftToRightFlow.e705ab22e2b028938916ade492bb9d81.svg",
     "static/media/RightToLeftFlow.svg": "/static/media/RightToLeftFlow.dd1a029d9ab27c3e72d81ec2b9d9d7b3.svg",
     "static/media/logo-main.png": "/static/media/logo-main.4ac1e95c4dc1e9320217.png",
@@ -36,12 +33,12 @@
     "static/media/menu.svg": "/static/media/menu.91de7f7bd5bc799dc02cedc74286bcd7.svg",
     "static/media/airplane.svg": "/static/media/airplane.7943fc0da7df202f3bc6ff6270ce295e.svg",
     "static/media/arrow.svg": "/static/media/arrow.dc9ec4357c97ffbfa9951d2323605b61.svg",
-    "main.2f96de93.css.map": "/static/css/main.2f96de93.css.map",
-    "main.4a15a7c6.js.map": "/static/js/main.4a15a7c6.js.map",
+    "main.cf150082.css.map": "/static/css/main.cf150082.css.map",
+    "main.2999c6ea.js.map": "/static/js/main.2999c6ea.js.map",
     "787.9e9f4ffd.chunk.js.map": "/static/js/787.9e9f4ffd.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.2f96de93.css",
-    "static/js/main.4a15a7c6.js"
+    "static/css/main.cf150082.css",
+    "static/js/main.2999c6ea.js"
   ]
 }
