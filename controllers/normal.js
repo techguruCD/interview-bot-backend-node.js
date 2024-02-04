@@ -32,7 +32,7 @@ exports.blogs = async (req, res) => {
 }
 
 exports.blog = async (req, res) => {
-  const blog = await db.blog.findOne({ where: { id: req.query.id } })
+  const blog = await db.blog.findOne({ where: { urlCaption: req.query.urlCaption } })
   if (!blog) {
     return res.status(400).send({
       message: { error: 'No blog found' }

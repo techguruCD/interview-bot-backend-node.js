@@ -6,7 +6,7 @@ const validator = require('express-joi-validation').createValidator({
 
 const blog = validator.query(
   Joi.object({
-    id: Joi.string().min(1).required().label('id')
+    urlCaption: Joi.string().min(1).required().label('Url caption')
   }).required()
 )
 

@@ -71,6 +71,18 @@ exports.createBlog = async (req, res) => {
         draftBlog.image = fileName
     }
 
+    let originUrlCaption = title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/[ ]/g, '-').toLowerCase()
+    let urlCaption;
+
+    for (let j = 0; ; j++) {
+        urlCaption = originUrlCaption
+        if (j) urlCaption += '' + j;
+        if (!(await db.blog.findOne({ where: { urlCaption } })))
+            break;
+    }
+
+    draftBlog.urlCaption = urlCaption;
+
     const blog = await db.blog.create(draftBlog)
     return res.json({
         blog,
@@ -112,6 +124,19 @@ exports.updateBlog = async (req, res) => {
                 draftBlog.image = null
             }
         }
+
+        let originUrlCaption = title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/[ ]/g, '-').toLowerCase()
+        let urlCaption;
+
+        for (let j = 0; ; j++) {
+            urlCaption = originUrlCaption
+            if (j) urlCaption += '' + j;
+            if (!(await db.blog.findOne({ where: { urlCaption, id: {[db.Sequelize.Op.ne]: blog.id} } })))
+                break;
+        }
+
+        draftBlog.urlCaption = urlCaption
+
         await blog.update(draftBlog)
         return res.json({
             blog,
@@ -168,15 +193,16 @@ exports.chatbotAddFile = async (req, res) => {
 
         let docs = null;
         if (content2Extension == 'pdf') {
-            const loader = new PDFLoader(path.join(__dirname, '../', fileName))
-            docs = (await loader.load()).map(doc => ({
-                pageContent: doc.pageContent,
-                metadata: {
-                    profileId: '0',
-                    fileId: id,
-                    type: 'cv'
-                }
-            }))
+            const loader = new PDFLoader(path.join(__dirname, '../', fileName),)
+            loader.
+                docs = (await loader.load()).map(doc => ({
+                    pageContent: doc.pageContent,
+                    metadata: {
+                        profileId: '0',
+                        fileId: id,
+                        type: 'cv'
+                    }
+                }))
         } else if (content2Extension == 'docx') {
             const loader = new DocxLoader(path.join(__dirname, '../', fileName))
             docs = (await loader.load()).map(doc => ({

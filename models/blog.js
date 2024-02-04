@@ -18,6 +18,11 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: true
       },
+      urlCaption: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
       type: {
         type: Sequelize.STRING,
         allowNull: false,
