@@ -21,7 +21,7 @@ exports.blogs = async (req, res) => {
     where: {
       type: 'blog'
     },
-    limit: 5,
+    // limit: 5,
     order: [
       ['createdAt', 'DESC']
     ]
